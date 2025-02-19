@@ -1,0 +1,35 @@
+template:
+  - trigger:
+      - platform: state
+        entity_id: binary_sensor.contatore_acqua_input  # Modifica il nome del sensore
+        from: "not_powered"
+        to: "powered"
+    sensor:
+      - name: "Impulsi Contatore Acqua"
+        unique_id: "impulsi_contatore_acqua"
+        state_class: total_increasing
+        unit_of_measurement: "impulsi"
+        device_class: water
+        state: "{{ states('sensor.impulsi_contatore_acqua') | int + 1 }}"
+template:
+  - sensor:
+      - name: "Consumo Acqua Litri"
+        unique_id: "consumo_acqua_litri"
+        unit_of_measurement: "L"
+        state_class: total_increasing
+        device_class: water
+        state: "{{ states('counter.impulsi_contatore_acqua') | int(default=0) * 10 }}"  # Modifica *1 in base alla conversione reale in questo caso 1 impulso equivale a 10 lt
+
+
+utility_meter:
+  daily_water_consumption:
+    source: sensor.consumo_acqua_litri
+    cycle: daily
+
+  weekly_water_consumption:
+    source: sensor.consumo_acqua_litri
+    cycle: weekly
+
+  monthly_water_consumption:
+    source: sensor.consumo_acqua_litri
+    cycle: monthly
